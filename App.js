@@ -20,19 +20,11 @@ export default class HelloWorld extends Component {
   render() {
     return (
       <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName='Start'
-        >
-          <Stack.Screen
-            name='Start'
-            component={Start}
-          />
-          <Stack.Screen
-            name='Chat'
-            component={Chat}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <Stack.Navigator initialRouteName='Start'>
+        <Stack.Screen name='Start' component={Start} />
+        <Stack.Screen name='Chat' component={Chat} />
+      </Stack.Navigator>
+    </NavigationContainer>
     );
   }
 }
@@ -40,6 +32,8 @@ export default class HelloWorld extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: #
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
