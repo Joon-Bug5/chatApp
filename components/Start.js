@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity } from
 import { TextInput } from 'react-native-gesture-handler';
 
 const backgroundImage = require('../assets/backgroundImage.png');
-const usernameIcon = require('../assets/icon.png');
+const usernameIcon = require('../assets/usernameIcon.png');
 //background color choices
 const colors = {
   color1: '#090C08',
