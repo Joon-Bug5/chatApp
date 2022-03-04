@@ -3,6 +3,8 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
+import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 // Firebase config for the app
 const firebaseConfig = {
@@ -36,14 +38,20 @@ export default class Chat extends React.Component {
 
     // Reference to the Firestore messages collection
     this.referenceChatMessages = firebase.firestore().collection('messages');
-    this.refMsgsUser = null;
   };
-
-
 
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
+
+    NetInfo.fetch().then((connection) => {
+      if (connection.isConnected) {
+        console.log('online');
+      } else {
+        console.log('offline');
+      }
+    });
+
     // User authentication
     this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (!user) {
@@ -67,6 +75,68 @@ export default class Chat extends React.Component {
     });
   };
 
+    // When updated, set the messages state with the current data
+    onCollectionUpdate = (querySnapshot) => {
+      const messages = [];
+      // Go through each document
+      querySnapshot.forEach((doc) => {
+        // Get the QueryDocumentSnapshot's data
+        let data = doc.data();
+        messages.push({
+          _id: data._id,
+          text: data.text,
+          createdAt: data.createdAt.toDate(),
+          user: {
+            _id: data.user._id,
+            name: data.user.name,
+            avatar: data.user.avatar
+          }
+        });
+      });
+      this.setState({
+        messages: messages
+      });
+    };
+
+    componentWillUnmount() {
+      //unsubscribe from collection updates
+      this.authUnsubscribe();
+      this.unsubscribe();
+    }
+
+  // To get message on sync storage
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // To save message on async storage
+  async saveMessages() {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+    console.log(error.message);
+    }
+  }
+
+  // To delete message from async storage
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   // Add messages to database
   addMessages() {
@@ -79,6 +149,7 @@ export default class Chat extends React.Component {
       user: this.state.user
     });
   }
+
   onSend(messages = []) {
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages),
@@ -87,28 +158,7 @@ export default class Chat extends React.Component {
     })
   };
 
-  // When updated, set the messages state with the current data
-  onCollectionUpdate = (querySnapshot) => {
-    const messages = [];
-    // Go through each document
-    querySnapshot.forEach((doc) => {
-      // Get the QueryDocumentSnapshot's data
-      let data = doc.data();
-      messages.push({
-        _id: data._id,
-        text: data.text,
-        createdAt: data.createdAt.toDate(),
-        user: {
-          _id: data.user._id,
-          name: data.user.name,
-          avatar: data.user.avatar
-        }
-      });
-    });
-    this.setState({
-      messages: messages
-    });
-  };
+
 
   renderBubble(props) {
     return(
