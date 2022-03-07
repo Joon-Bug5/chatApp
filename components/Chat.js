@@ -3,7 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
-import AsyncStorage from '@react-native-community/async-storage';
+import { AsyncStorage } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 // Firebase config for the app
@@ -38,7 +38,6 @@ export default class Chat extends React.Component {
 
     // Reference to the Firestore messages collection
     this.referenceChatMessages = firebase.firestore().collection('messages');
-    this.refMsgsUser = null;
   };
 
   componentDidMount() {
