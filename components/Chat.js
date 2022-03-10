@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
-import { Bubble, GiftedChat } from 'react-native-gifted-chat';
+import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import { AsyncStorage } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+
+import MapView from 'react-native-maps';
 
 // Firebase config for the app
 const firebaseConfig = {
@@ -112,12 +114,15 @@ export default class Chat extends React.Component {
       this.setState({
         messages: messages
       });
+          this.saveMessages()
     };
 
     componentWillUnmount() {
-      //unsubscribe from collection updates
-      this.authUnsubscribe();
-      this.unsubscribe();
+      // stop listening
+      if (this.state.isConnected) {
+        this.authUnsubscribe();
+        this.unsubscribe();
+      }
     }
 
   // To get message on sync storage
@@ -195,6 +200,15 @@ export default class Chat extends React.Component {
     )
   }
 
+    // (Hide texting when offline)
+    renderInputToolbar(props) {
+      if (this.state.isConnected == false) {
+      } else {
+        return <InputToolbar {...props} />;
+      }
+    }
+  
+
   render() {
     let bgColor = this.props.route.params.bgColor;
 
@@ -205,6 +219,7 @@ export default class Chat extends React.Component {
       renderBubble={this.renderBubble.bind(this)}
       messages={this.state.messages}
       onSend={messages => this.onSend(messages)}
+      renderInputToolbar={this.renderInputToolbar.bind(this)}
       user={{
         _id: this.state.user._id,
         name: this.state.user.name,
