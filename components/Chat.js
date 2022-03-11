@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, LogBox} from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
-import * as firebase from 'firebase';
-import 'firebase/firestore';
 import { AsyncStorage } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-
+import CustomActions from './CustomActions';
+import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 
+const firebase = require('firebase');
+require('firebase/firestore');
 // Firebase config for the app
 const firebaseConfig = {
   apiKey: "AIzaSyAaCpkI74xxLxdrDNZCIuQrDwEeDBT2Y9c",
@@ -32,6 +33,8 @@ export default class Chat extends React.Component {
         avatar: '',
       },
       isConnected: false,
+      image: null,
+      location: null,
     };
 
     // Initializing firebase
@@ -42,6 +45,14 @@ export default class Chat extends React.Component {
     // Reference to the Firestore messages collection
     this.referenceChatMessages = firebase.firestore().collection('messages');
     this.refMsgsUser = null;
+
+         // To remove warning message in the console 
+         LogBox.ignoreLogs([
+          'Setting a timer',
+          'Warning: ...',
+          'undefined',
+          'Animated.event now requires a second argument for options',
+        ]);
   };
 
   componentDidMount() {
@@ -108,7 +119,9 @@ export default class Chat extends React.Component {
             _id: data.user._id,
             name: data.user.name,
             avatar: data.user.avatar
-          }
+          },
+          image: data.image || null,
+          location: data.location || null,
         });
       });
       this.setState({
@@ -160,14 +173,16 @@ export default class Chat extends React.Component {
   }
 
   // Add messages to database
-  addMessages() {
+  addMessages() { 
     const message = this.state.messages[0];
-    // Add a new messages to the collection
+    // add a new messages to the collection
     this.referenceChatMessages.add({
       _id: message._id,
-      text: message.text || '',
+      text: message.text || "",
       createdAt: message.createdAt,
-      user: this.state.user
+      user: this.state.user,
+      image: message.image || "",
+      location: message.location || null,
     });
   }
 
@@ -200,17 +215,43 @@ export default class Chat extends React.Component {
     )
   }
 
-    // (Hide texting when offline)
+    // Hide texting when offline
     renderInputToolbar(props) {
       if (this.state.isConnected == false) {
       } else {
         return <InputToolbar {...props} />;
       }
     }
-  
 
-  render() {
-    let bgColor = this.props.route.params.bgColor;
+    // To access CustomActions
+    renderCustomActions = (props) => {
+      return <CustomActions {...props} />;
+    };
+
+    // Return a MapView when surrentMessage contains location data
+      renderCustomView (props) {
+        const { currentMessage} = props;
+          if (currentMessage.location) {
+            return (
+              <MapView
+                style={{width: 300,
+                height: 200,
+                borderRadius: 13,
+                margin: 3}}
+                region={{
+                latitude: currentMessage.location.latitude,
+                longitude: currentMessage.location.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+                }}
+              />
+            );
+          }
+        return null;
+      }
+
+      render() {
+        let bgColor = this.props.route.params.bgColor;
 
     return (
       <View style={styles.container}>
@@ -220,6 +261,8 @@ export default class Chat extends React.Component {
       messages={this.state.messages}
       onSend={messages => this.onSend(messages)}
       renderInputToolbar={this.renderInputToolbar.bind(this)}
+      renderActions={this.renderCustomActions}
+      renderCustomView={this.renderCustomView}
       user={{
         _id: this.state.user._id,
         name: this.state.user.name,
