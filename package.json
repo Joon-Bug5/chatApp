@@ -1,12 +1,13 @@
 {
   "name": "hello-world",
   "version": "1.0.0",
-  "homepage": "https://joon-bug5.github.io/chatApp/",
+  "main": "node_modules/expo/AppEntry.js",
+  "homepage": "https://joon-bug5.github.io/chatApp",
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "start": "expo start",
+    "deploy": "gh-pages -d web-build",
+    "predeploy": "expo build:web",
     "build": "react-scripts build",
+    "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -25,6 +26,7 @@
     "expo-permissions": "~13.1.0",
     "expo-status-bar": "~1.2.0",
     "firebase": "^8.2.3",
+    "gh-pages": "^3.2.3",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
@@ -38,8 +40,7 @@
     "react-navigation": "^4.4.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9",
-    "gh-pages": "^3.2.3"
+    "@babel/core": "^7.12.9"
   },
   "private": true
 }
