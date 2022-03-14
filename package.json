@@ -1,9 +1,12 @@
 {
   "name": "hello-world",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
+  "homepage": "https://joon-bug5.github.io/chatApp/",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "expo start",
+    "build": "react-scripts build",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -35,7 +38,8 @@
     "react-navigation": "^4.4.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "gh-pages": "^3.2.3"
   },
   "private": true
 }
